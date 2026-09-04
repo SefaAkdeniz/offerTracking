@@ -3,8 +3,8 @@ from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils import timezone
 
-
 CITY_CHOICES = (
+	('34', 'İstanbul'),
 	('01', 'Adana'),
 	('02', 'Adıyaman'),
 	('03', 'Afyonkarahisar'),
@@ -44,7 +44,6 @@ CITY_CHOICES = (
 	('31', 'Hatay'),
 	('76', 'Iğdır'),
 	('32', 'Isparta'),
-	('34', 'İstanbul'),
 	('35', 'İzmir'),
 	('46', 'Kahramanmaraş'),
 	('78', 'Karabük'),
@@ -88,7 +87,6 @@ CITY_CHOICES = (
 	('67', 'Zonguldak'),
 )
 
-
 class Customer(models.Model):
 	company_name = models.CharField('Firma adı', max_length=200)
 	address = models.TextField('Firma adresi')
@@ -118,8 +116,6 @@ class Customer(models.Model):
 	class Meta:
 		verbose_name = 'Müşteri'
 		verbose_name_plural = 'Müşteriler'
-		#ordering = ('company_name',)
 
 	def __str__(self):
 		return self.company_name
-

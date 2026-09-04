@@ -26,7 +26,6 @@ admin.site.site_title = "Yönetim Paneli"
 admin.site.index_title = "Site Yönetimi"
 
 urlpatterns = [
-    path('', admin.site.urls),
     path('offers/<int:offer_id>/pdf/', offer_pdf, name='offer_pdf'),
 ]
 
@@ -35,3 +34,7 @@ if settings.DEBUG:
         settings.MEDIA_URL,
         document_root=settings.MEDIA_ROOT
     )
+
+urlpatterns += [
+    path('', admin.site.urls),
+]
