@@ -6,6 +6,9 @@ from .views import offer_pdf_response
 
 class OfferItemInline(admin.TabularInline):
 	model = OfferItem
+	autocomplete_fields = (
+    'product',
+    )
 	extra = 1
 
 
@@ -17,6 +20,7 @@ class OfferAdmin(admin.ModelAdmin):
 	readonly_fields = ('revision_number', 'created_by')
 	inlines = (OfferItemInline,)
 	actions = ('download_pdf_with_photos', 'download_pdf_without_photos')
+	
 
 	def save_model(self, request, obj, form, change):
 		if not change and obj.created_by is None:

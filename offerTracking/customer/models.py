@@ -93,6 +93,10 @@ class Customer(models.Model):
 	email = models.EmailField('E-posta adresi')
 	phone = models.CharField('Telefon numarası', max_length=30)
 	city = models.CharField('Şehir', max_length=2, choices=CITY_CHOICES)
+	offer_temporarily_closed = models.BooleanField(
+		'Teklife geçici olarak kapalı',
+		default=False,
+	)
 	discount_rate = models.DecimalField(
 		'İskonto oranı (%)',
 		max_digits=5,
@@ -119,3 +123,24 @@ class Customer(models.Model):
 
 	def __str__(self):
 		return self.company_name
+
+
+class CustomerContact(models.Model):
+	customer = models.ForeignKey(
+		Customer,
+		verbose_name='Müşteri',
+		on_delete=models.CASCADE,
+		related_name='contacts',
+	)
+	first_name = models.CharField('Adı', max_length=100)
+	last_name = models.CharField('Soyadı', max_length=100)
+	title = models.CharField('Ünvanı', max_length=150, blank=True)
+	email = models.EmailField('E-posta adresi')
+	phone = models.CharField('Telefon numarası', max_length=30)
+
+	class Meta:
+		verbose_name = 'Müşteri kişisi'
+		verbose_name_plural = 'Müşteri kişileri'
+
+	def __str__(self):
+		return f'{self.first_name} {self.last_name}'

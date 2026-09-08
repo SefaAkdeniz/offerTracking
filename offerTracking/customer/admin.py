@@ -1,11 +1,16 @@
 from django.contrib import admin
-from .models import Customer
+from .models import Customer, CustomerContact
+
+
+class CustomerContactInline(admin.TabularInline):
+    model = CustomerContact
+    extra = 1
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = ('company_name', 'email', 'phone', 'city', 'discount_rate', 'responsible_personnel', 'first_relationship_date')
+    list_display = ('company_name', 'email', 'phone', 'city', 'offer_temporarily_closed', 'discount_rate', 'responsible_personnel', 'first_relationship_date')
     #list_display_links = ('company_name', 'email', 'phone', 'city', 'discount_rate', 'responsible_personnel', 'first_relationship_date')
-    list_filter = ('responsible_personnel', 'discount_rate')
+    list_filter = ('responsible_personnel', 'offer_temporarily_closed', 'discount_rate')
     search_fields = ('company_name', 'email', 'phone')
     readonly_fields = ('first_relationship_date',)
     list_per_page = 15
@@ -19,6 +24,7 @@ class CustomerAdmin(admin.ModelAdmin):
     ordering = ('company_name',)
     date_hierarchy = 'first_relationship_date'
     list_select_related = ('responsible_personnel',)
+    inlines = (CustomerContactInline,)
     fieldsets = (
     ('Firma Bilgileri', {
         'fields': (
@@ -27,6 +33,7 @@ class CustomerAdmin(admin.ModelAdmin):
             'email',
             'address',
             'city',
+            'offer_temporarily_closed',
         )
     }),
     ('Ticari Bilgiler', {
