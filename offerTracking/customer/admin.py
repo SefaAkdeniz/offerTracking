@@ -27,7 +27,7 @@ class CustomerAdmin(admin.ModelAdmin):
     search_help_text = 'Firma adı, e-posta veya telefon numarası ile arayın.'
     ordering = ('company_name',)
     date_hierarchy = 'first_relationship_date'
-    list_select_related = ('responsible_personnel',)
+    #list_select_related = ('responsible_personnel',)
     inlines = (CustomerContactInline,)
     fieldsets = (
     ('FİRMA BİLGİLERİ', {
