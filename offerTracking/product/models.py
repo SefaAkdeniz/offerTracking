@@ -14,9 +14,27 @@ class Brand(models.Model):
 		return self.name
 
 
+class ProductGroup(models.Model):
+	name = models.CharField('Ürün grubu adı', max_length=150, unique=True)
+
+	class Meta:
+		verbose_name = 'Ürün grubu'
+		verbose_name_plural = 'Ürün grupları'
+
+	def __str__(self):
+		return self.name
+
+
 class Product(models.Model):
-	photo = models.ImageField('Ürün fotoğrafı', upload_to='products/', blank=True)
-	name = models.CharField('Ürün adı', max_length=200)
+	photo = models.ImageField('Fotoğraf', upload_to='products/', blank=True)
+	product_code = models.CharField('Ürün kodu', max_length=100, unique=True)
+	product_group = models.ForeignKey(
+		ProductGroup,
+		verbose_name='Ürün grubu',
+		on_delete=models.PROTECT,
+		related_name='products',
+	)
+	name = models.CharField('Adı', max_length=200)
 	technical_description = models.TextField('Teknik özellik açıklaması', blank=True)
 	brand = models.ForeignKey(
 		Brand,
@@ -33,7 +51,7 @@ class Product(models.Model):
 		#ordering = ('name',)
 
 	def __str__(self):
-		return self.name
+		return self.product_code
 
 
 class Stock(models.Model):

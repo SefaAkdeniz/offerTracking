@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Brand, Product, Stock
+from .models import Brand, Product, ProductGroup, Stock
 
 
 @admin.register(Brand)
@@ -8,12 +8,15 @@ class BrandAdmin(admin.ModelAdmin):
 	list_display = ('name',)
 	search_fields = ('name',)
 
+@admin.register(ProductGroup)
+class ProductGroupAdmin(admin.ModelAdmin):
+	list_display = ('name',)
+	search_fields = ('name',)
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-	list_display = ('name', 'brand', 'cost', 'list_price')
-	search_fields = ('name', 'brand__name', 'technical_description')
-
+	list_display = ('product_code', 'name', 'product_group', 'brand', 'cost', 'list_price')
+	search_fields = ('product_code', 'name', 'product_group__name', 'brand__name', 'technical_description')
 
 @admin.register(Stock)
 class StockAdmin(admin.ModelAdmin):
