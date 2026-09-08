@@ -45,7 +45,36 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(Stock)
 class StockAdmin(admin.ModelAdmin):
-	list_display = ('product', 'quantity', 'last_updated_at')
-	list_filter = ('last_updated_at',)
-	search_fields = ('product__name', 'product__brand__name')
+	list_display = ('photo_thumbnail', 'product', 'quantity', 'last_updated_at')
+	list_display_links = ('product',)
+	list_filter = ('product__product_group', 'product__brand', 'last_updated_at')
+	search_fields = (
+		'product__product_code',
+		'product__name',
+		'product__product_group__name',
+		'product__brand__name',
+		'product__technical_description',
+	)
+	search_help_text = 'ürün adı, ürün kodu, marka, ürün grubu veya teknik özelliklerle arayın.'
+	autocomplete_fields = ('product',)
+	list_per_page = 15
+	ordering = ('product__product_code',)
+	#list_select_related = ('product', 'product__product_group', 'product__brand')
+	fieldsets = (
+		('STOK BİLGİLERİ', {
+			'fields': ('product', 'quantity')
+		}),
+		('SİSTEM BİLGİLERİ', {
+			'fields': ('last_updated_at',)
+		}),
+	)
 	readonly_fields = ('last_updated_at',)
+
+	@admin.display(description='Fotoğraf')
+	def photo_thumbnail(self, obj):
+		if not obj.product.photo:
+			return '-'
+		return format_html(
+			'<img src="{}" width="60" height="60" style="object-fit: contain;" />',
+			obj.product.photo.url,
+		)
