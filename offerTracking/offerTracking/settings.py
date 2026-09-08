@@ -123,9 +123,6 @@ MEDIA_URL = '/media/'
 
 MEDIA_ROOT = BASE_DIR / 'media'
 
-print("BASE_DIR:", BASE_DIR)
-print("MEDIA_ROOT:", MEDIA_ROOT)
-
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 

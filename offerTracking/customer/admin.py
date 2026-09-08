@@ -11,7 +11,13 @@ class CustomerAdmin(admin.ModelAdmin):
     list_display = ('company_name', 'email', 'phone', 'city', 'offer_temporarily_closed', 'discount_rate', 'responsible_personnel', 'first_relationship_date')
     #list_display_links = ('company_name', 'email', 'phone', 'city', 'discount_rate', 'responsible_personnel', 'first_relationship_date')
     list_filter = ('responsible_personnel', 'offer_temporarily_closed', 'discount_rate')
-    search_fields = ('company_name', 'email', 'phone')
+    search_fields = (
+        'company_name',
+        'email',
+        'phone',
+        'contacts__email',
+        'contacts__phone',
+    )
     readonly_fields = ('first_relationship_date',)
     list_per_page = 15
     #list_max_show_all = 5
