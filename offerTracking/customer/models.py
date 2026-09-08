@@ -88,8 +88,8 @@ CITY_CHOICES = (
 )
 
 class Customer(models.Model):
-	company_name = models.CharField('Firma adı', max_length=200)
-	address = models.TextField('Firma adresi')
+	company_name = models.CharField('Adı', max_length=200)
+	address = models.TextField('Adresi')
 	email = models.EmailField('E-posta adresi')
 	phone = models.CharField('Telefon numarası', max_length=30)
 	city = models.CharField('Şehir', max_length=2, choices=CITY_CHOICES)
