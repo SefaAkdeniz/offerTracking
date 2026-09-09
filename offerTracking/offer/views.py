@@ -1,4 +1,3 @@
-from decimal import Decimal
 from io import BytesIO
 from pathlib import Path
 from xml.sax.saxutils import escape
@@ -65,10 +64,8 @@ def offer_pdf_response(offer, include_photos=True):
 		rows = [[Paragraph(header, header_style) for header in ('Fotoğraf', 'Ürün', 'Marka', 'Teknik özellikler', 'Adet', 'Birim fiyat', 'Tutar')]]
 	else:
 		rows = [[Paragraph(header, header_style) for header in ('Ürün', 'Marka', 'Teknik özellikler', 'Adet', 'Birim fiyat', 'Tutar')]]
-	subtotal = Decimal('0')
 	for item in items:
-		amount = item.product.list_price * item.quantity
-		subtotal += amount
+		amount = item.total
 		item_rows = [
 			Paragraph(escape(item.product.name), cell_style),
 			Paragraph(escape(item.product.brand.name), cell_style),
@@ -85,17 +82,22 @@ def offer_pdf_response(offer, include_photos=True):
 			item_rows.insert(0, photo)
 		rows.append(item_rows)
 
-	discount_rate = offer.discount_rate or Decimal('0')
-	discount_amount = subtotal * discount_rate / Decimal('100')
-	total = subtotal - discount_amount
+	subtotal = offer.subtotal
+	discount_amount = offer.discount
+	total = offer.total
 	story = [
 		Paragraph('TEKLİF', styles['Title']),
 		Spacer(1, 6 * mm),
+		Paragraph(f'<b>Teklif numarası:</b> {escape(offer.offer_number)}', styles['Normal']),
 		Paragraph(f'<b>Müşteri:</b> {escape(offer.customer.company_name)}', styles['Normal']),
 		Paragraph(f'<b>Teklif tarihi:</b> {offer.offer_date:%d.%m.%Y}', styles['Normal']),
 		Paragraph(f'<b>Revizyon:</b> {offer.revision_number}', styles['Normal']),
 		Paragraph(
 			f'<b>Oluşturan:</b> {escape(offer.created_by.get_full_name() or offer.created_by.username) if offer.created_by else "-"}',
+			styles['Normal'],
+		),
+		Paragraph(
+			f'<b>Müşteri kişisi:</b> {escape(str(offer.customer_contact)) if offer.customer_contact else "-"}',
 			styles['Normal'],
 		),
 		Spacer(1, 8 * mm),
@@ -126,7 +128,7 @@ def offer_pdf_response(offer, include_photos=True):
 
 	summary = [
 		['Ara toplam:', f'{subtotal:,.2f} TL'],
-		[f'İskonto (%{discount_rate:,.2f}):', f'-{discount_amount:,.2f} TL'],
+		['İskonto:', f'-{discount_amount:,.2f} TL'],
 		['Genel toplam:', f'{total:,.2f} TL'],
 	]
 	summary_table = Table(summary, colWidths=[45 * mm, 35 * mm], hAlign='RIGHT')

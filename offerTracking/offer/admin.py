@@ -6,18 +6,20 @@ from .views import offer_pdf_response
 
 class OfferItemInline(admin.TabularInline):
 	model = OfferItem
-	autocomplete_fields = (
-    'product',
-    )
-	extra = 1
+	autocomplete_fields = ('product',)
+	fields = ('product', 'quantity', 'discount_rate')
+	extra = 0
 
 
 @admin.register(Offer)
 class OfferAdmin(admin.ModelAdmin):
-	list_display = ('id', 'customer', 'offer_date', 'revision_number', 'discount_rate', 'created_by')
-	list_filter = ('offer_date',)
-	search_fields = ('customer__company_name', 'created_by__username')
-	readonly_fields = ('revision_number', 'created_by')
+	list_display = ('offer_number_display', 'customer', 'customer_contact', 'offer_date', 'discount', 'created_by')
+	list_filter = ('customer', 'created_by','customer_contact','discount','revision_number','items__product','items__product__brand')
+	search_fields = ('customer__company_name', 'customer_contact__first_name', 'customer_contact__last_name', 'created_by__username')
+	readonly_fields = ('offer_number_display', 'revision_number', 'created_by')
+	data_hierarchy = 'offer_date'
+	search_help_text = 'Müşteri firma adı, müşteri kişi adı veya kullanıcı adı ile arayın.'
+	list_per_page = 15
 	inlines = (OfferItemInline,)
 	actions = ('download_pdf_with_photos', 'download_pdf_without_photos')
 	
@@ -26,6 +28,10 @@ class OfferAdmin(admin.ModelAdmin):
 		if not change and obj.created_by is None:
 			obj.created_by = request.user
 		super().save_model(request, obj, form, change)
+
+	@admin.display(description='Teklif numarası')
+	def offer_number_display(self, obj):
+		return obj.offer_number
 
 	def _download_pdf(self, request, queryset, include_photos):
 		if queryset.count() != 1:
@@ -43,8 +49,8 @@ class OfferAdmin(admin.ModelAdmin):
 		return self._download_pdf(request, queryset, include_photos=False)
 
 
-@admin.register(OfferItem)
-class OfferItemAdmin(admin.ModelAdmin):
-	list_display = ('offer', 'product', 'quantity')
-	list_filter = ('product',)
-	search_fields = ('offer__id', 'product__name')
+# @admin.register(OfferItem)
+# class OfferItemAdmin(admin.ModelAdmin):
+# 	list_display = ('offer', 'product', 'quantity')
+# 	list_filter = ('product',)
+# 	search_fields = ('offer__id', 'product__name')
