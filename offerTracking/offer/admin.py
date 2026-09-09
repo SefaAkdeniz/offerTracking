@@ -1,5 +1,5 @@
 from django.contrib import admin
-
+from django.contrib.admin import RelatedOnlyFieldListFilter
 from .models import Offer, OfferItem
 from .views import offer_pdf_response
 
@@ -14,10 +14,15 @@ class OfferItemInline(admin.TabularInline):
 @admin.register(Offer)
 class OfferAdmin(admin.ModelAdmin):
 	list_display = ('offer_number_display', 'customer', 'customer_contact', 'offer_date', 'discount', 'created_by')
-	list_filter = ('customer', 'created_by','customer_contact','discount','revision_number','items__product','items__product__brand')
+	list_filter = (
+        ('customer', RelatedOnlyFieldListFilter),
+        ('customer_contact', RelatedOnlyFieldListFilter),
+        ('created_by', RelatedOnlyFieldListFilter),
+    )
+	#list_filter = ('customer', 'created_by','customer_contact','discount','revision_number','items__product','items__product__brand')
 	search_fields = ('customer__company_name', 'customer_contact__first_name', 'customer_contact__last_name', 'created_by__username')
 	readonly_fields = ('offer_number_display', 'revision_number', 'created_by')
-	data_hierarchy = 'offer_date'
+	date_hierarchy = 'offer_date'
 	search_help_text = 'Müşteri firma adı, müşteri kişi adı veya kullanıcı adı ile arayın.'
 	list_per_page = 15
 	inlines = (OfferItemInline,)
