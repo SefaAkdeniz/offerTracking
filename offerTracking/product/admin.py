@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
+from django.contrib.admin import RelatedOnlyFieldListFilter
 
 from .models import Brand, Product, ProductGroup, Stock
 
@@ -18,7 +19,7 @@ class ProductGroupAdmin(admin.ModelAdmin):
 class ProductAdmin(admin.ModelAdmin):
 	list_display = ('photo_thumbnail', 'product_code', 'name', 'product_group', 'brand', 'cost', 'list_price')
 	list_display_links = ('product_code', 'name')
-	list_filter = ('product_group', 'brand')
+	list_filter = (('product_group', RelatedOnlyFieldListFilter), ('brand', RelatedOnlyFieldListFilter))
 	search_fields = ('product_code', 'name', 'product_group__name', 'brand__name', 'technical_description')
 	search_help_text = 'ürün adı, ürün kodu, marka, ürün grubu veya teknik özelliklerle arayın.'
 	autocomplete_fields = ('product_group', 'brand')
@@ -47,7 +48,7 @@ class ProductAdmin(admin.ModelAdmin):
 class StockAdmin(admin.ModelAdmin):
 	list_display = ('photo_thumbnail', 'product', 'quantity', 'last_updated_at')
 	list_display_links = ('product',)
-	list_filter = ('product__product_group', 'product__brand', 'last_updated_at')
+	list_filter = (('product__product_group', RelatedOnlyFieldListFilter), ('product__brand', RelatedOnlyFieldListFilter), 'last_updated_at')
 	search_fields = (
 		'product__product_code',
 		'product__name',

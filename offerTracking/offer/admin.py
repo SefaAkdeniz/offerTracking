@@ -19,6 +19,7 @@ class OfferAdmin(admin.ModelAdmin):
         ('customer_contact', RelatedOnlyFieldListFilter),
         ('created_by', RelatedOnlyFieldListFilter),
     )
+	autocomplete_fields = ('customer','customer_contact',)
 	#list_filter = ('customer', 'created_by','customer_contact','discount','revision_number','items__product','items__product__brand')
 	search_fields = ('customer__company_name', 'customer_contact__first_name', 'customer_contact__last_name', 'created_by__username')
 	readonly_fields = ('offer_number_display', 'revision_number', 'created_by')

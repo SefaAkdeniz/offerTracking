@@ -1,5 +1,7 @@
 from django.contrib import admin
 from .models import Customer, CustomerContact
+from django.contrib.admin import RelatedOnlyFieldListFilter
+
 
 
 class CustomerContactInline(admin.TabularInline):
@@ -10,7 +12,8 @@ class CustomerContactInline(admin.TabularInline):
 class CustomerAdmin(admin.ModelAdmin):
     list_display = ('company_name', 'email', 'phone', 'city', 'offer_temporarily_closed', 'discount_rate', 'responsible_personnel', 'first_relationship_date')
     #list_display_links = ('company_name', 'email', 'phone', 'city', 'discount_rate', 'responsible_personnel', 'first_relationship_date')
-    list_filter = ('responsible_personnel', 'offer_temporarily_closed')
+    list_filter = (('responsible_personnel',RelatedOnlyFieldListFilter),'offer_temporarily_closed' )
+    #list_select_related = ('responsible_personnel',)
     search_fields = (
         'company_name',
         'email',
@@ -27,7 +30,7 @@ class CustomerAdmin(admin.ModelAdmin):
     search_help_text = 'Firma adı, e-posta veya telefon numarası ile arayın.'
     ordering = ('company_name',)
     date_hierarchy = 'first_relationship_date'
-    #list_select_related = ('responsible_personnel',)
+    
     inlines = (CustomerContactInline,)
     fieldsets = (
     ('FİRMA BİLGİLERİ', {
@@ -52,3 +55,8 @@ class CustomerAdmin(admin.ModelAdmin):
         )
     }),   
     )
+
+@admin.register(CustomerContact)
+class CustomerContactAdmin(admin.ModelAdmin):
+    list_display = ('first_name', 'last_name', 'email', 'phone')
+    search_fields = ('first_name', 'last_name', 'email', 'phone')
