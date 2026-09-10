@@ -1,9 +1,7 @@
 from django.contrib import admin
-from django.utils.html import format_html
 from django.contrib.admin import RelatedOnlyFieldListFilter
-
 from .models import Brand, Product, ProductGroup, Stock
-
+from django.utils.html import format_html
 
 @admin.register(Brand)
 class BrandAdmin(admin.ModelAdmin):
@@ -25,8 +23,6 @@ class ProductAdmin(admin.ModelAdmin):
 	autocomplete_fields = ('product_group', 'brand')
 	list_per_page = 15
 	ordering = ('product_code',)
-	#list_select_related = True
-	#preserve_filters = True
 	fieldsets = (
 		('ÜRÜN BİLGİLER', {
 			'fields': ('product_code', 'name', 'technical_description', 'product_group', 'brand','photo')
@@ -60,7 +56,6 @@ class StockAdmin(admin.ModelAdmin):
 	autocomplete_fields = ('product',)
 	list_per_page = 15
 	ordering = ('product__product_code',)
-	#list_select_related = ('product', 'product__product_group', 'product__brand')
 	fieldsets = (
 		('STOK BİLGİLERİ', {
 			'fields': ('product', 'quantity')

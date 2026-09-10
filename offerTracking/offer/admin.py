@@ -3,13 +3,11 @@ from django.contrib.admin import RelatedOnlyFieldListFilter
 from .models import Offer, OfferItem
 from .views import offer_pdf_response
 
-
 class OfferItemInline(admin.TabularInline):
 	model = OfferItem
 	autocomplete_fields = ('product',)
 	fields = ('product', 'quantity', 'discount_rate')
 	extra = 0
-
 
 @admin.register(Offer)
 class OfferAdmin(admin.ModelAdmin):
@@ -20,7 +18,6 @@ class OfferAdmin(admin.ModelAdmin):
         ('created_by', RelatedOnlyFieldListFilter),
     )
 	autocomplete_fields = ('customer','customer_contact',)
-	#list_filter = ('customer', 'created_by','customer_contact','discount','revision_number','items__product','items__product__brand')
 	search_fields = ('customer__company_name', 'customer_contact__first_name', 'customer_contact__last_name', 'created_by__username')
 	readonly_fields = ('offer_number_display', 'revision_number', 'created_by')
 	date_hierarchy = 'offer_date'
@@ -53,10 +50,3 @@ class OfferAdmin(admin.ModelAdmin):
 	@admin.action(description='Fotoğrafsız teklif PDF indir')
 	def download_pdf_without_photos(self, request, queryset):
 		return self._download_pdf(request, queryset, include_photos=False)
-
-
-# @admin.register(OfferItem)
-# class OfferItemAdmin(admin.ModelAdmin):
-# 	list_display = ('offer', 'product', 'quantity')
-# 	list_filter = ('product',)
-# 	search_fields = ('offer__id', 'product__name')
