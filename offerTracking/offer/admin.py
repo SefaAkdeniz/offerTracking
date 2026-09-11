@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.contrib.admin import RelatedOnlyFieldListFilter
+from django.utils.html import format_html
 from django.db.models import Prefetch
 from .models import Offer, OfferItem, PaymentMethod
 from .views import offer_pdf_response
@@ -55,15 +56,34 @@ class OfferAdmin(admin.ModelAdmin):
 	def total_display(self,obj):
 		return f"{obj.total:.2f}"
 
-	@admin.display(boolean=True, description='Stok yeterli')
+	@admin.display(description='Stok durumu')
 	def stock_available(self, obj):
 		if obj.status != Offer.Status.APPROVED:
 			return None
 
-		return all(
-			getattr(item.product, 'stock', None) is not None
-			and item.product.stock.quantity >= item.quantity
-			for item in obj.items.all()
+		stock_available = True
+		stock_details = []
+		for item in obj.items.all():
+			stock = getattr(item.product, 'stock', None)
+			remaining_quantity = stock.quantity if stock else 0
+			required_quantity = max(item.quantity - remaining_quantity, 0)
+			if remaining_quantity < item.quantity:
+				stock_available = False
+			if required_quantity:
+				stock_details.append(
+					f'{item.product.product_code} - {item.product.name}: '
+					f'stok düşüldükten sonra gereken {required_quantity} adet'
+				)
+
+		tooltip = '\n'.join(stock_details)
+		icon = '✓' if stock_available else '✗'
+		color = '#198754' if stock_available else '#dc3545'
+		return format_html(
+			'<span title="{}" aria-label="{}" style="color: {}; font-size: 1.2em; font-weight: bold; cursor: help;">{}</span>',
+			tooltip,
+			tooltip,
+			color,
+			icon,
 		)
 
 	def _download_pdf(self, request, queryset, include_photos):
