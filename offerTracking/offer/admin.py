@@ -1,7 +1,14 @@
 from django.contrib import admin
 from django.contrib.admin import RelatedOnlyFieldListFilter
-from .models import Offer, OfferItem
+from .models import Offer, OfferItem, PaymentMethod
 from .views import offer_pdf_response
+
+
+@admin.register(PaymentMethod)
+class PaymentMethodAdmin(admin.ModelAdmin):
+	list_display = ('name',)
+	search_fields = ('name',)
+
 
 class OfferItemInline(admin.TabularInline):
 	model = OfferItem
@@ -9,15 +16,17 @@ class OfferItemInline(admin.TabularInline):
 	fields = ('product', 'quantity', 'discount_rate')
 	extra = 0
 
+
 @admin.register(Offer)
 class OfferAdmin(admin.ModelAdmin):
-	list_display = ('offer_number_display', 'customer', 'customer_contact', 'offer_date', 'discount', 'total_display' , 'created_by')
+	list_display = ('offer_number_display', 'customer', 'customer_contact', 'offer_date', 'status', 'payment_method', 'discount', 'total_display', 'created_by')
 	list_filter = (
         ('customer', RelatedOnlyFieldListFilter),
         ('customer_contact', RelatedOnlyFieldListFilter),
+		'status',
         ('created_by', RelatedOnlyFieldListFilter),
     )
-	autocomplete_fields = ('customer','customer_contact',)
+	autocomplete_fields = ('customer', 'customer_contact', 'payment_method')
 	search_fields = ('customer__company_name', 'customer_contact__first_name', 'customer_contact__last_name', 'created_by__username')
 	readonly_fields = ('offer_number_display', 'revision_number', 'created_by')
 	date_hierarchy = 'offer_date'

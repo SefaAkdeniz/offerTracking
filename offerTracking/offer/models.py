@@ -4,7 +4,26 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils import timezone
 
+
+class PaymentMethod(models.Model):
+	name = models.CharField('Ödeme yöntemi', max_length=100)
+	
+
+	class Meta:
+		verbose_name = 'Ödeme yöntemi'
+		verbose_name_plural = 'Ödeme yöntemleri'
+
+	def __str__(self):
+		return self.name
+
+
 class Offer(models.Model):
+	class Status(models.TextChoices):
+		DRAFT = 'draft', 'Taslak'
+		SENT = 'sent', 'Gönderildi'
+		APPROVED = 'approved', 'Onaylandı'
+		REJECTED = 'rejected', 'Reddedildi'
+
 	customer = models.ForeignKey(
 		'customer.Customer',
 		verbose_name='Müşteri',
@@ -20,6 +39,20 @@ class Offer(models.Model):
 		related_name='offers',
 	)
 	offer_date = models.DateField('Teklif tarihi', default=timezone.localdate)
+	status = models.CharField(
+		'Teklif durumu',
+		max_length=20,
+		choices=Status.choices,
+		default=Status.DRAFT,
+	)
+	payment_method = models.ForeignKey(
+		PaymentMethod,
+		verbose_name='Ödeme yöntemi',
+		on_delete=models.PROTECT,
+		null=True,
+		blank=True,
+		related_name='offers',
+	)
 	revision_number = models.PositiveIntegerField('Revizyon numarası', default=0, editable=False)
 	created_by = models.ForeignKey(
 		settings.AUTH_USER_MODEL,
@@ -71,6 +104,7 @@ class Offer(models.Model):
 		if self.pk:
 			self.revision_number += 1
 		super().save(*args, **kwargs)
+
 
 class OfferItem(models.Model):
 	offer = models.ForeignKey(
