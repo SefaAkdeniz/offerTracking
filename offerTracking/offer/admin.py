@@ -1,8 +1,13 @@
+from collections import defaultdict
+
 from django.contrib import admin
 from django.contrib.admin import RelatedOnlyFieldListFilter
+from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.utils.html import format_html
 from django.db.models import Prefetch
 from .models import Offer, OfferItem, PaymentMethod
+from product.models import Stock
 from .views import offer_pdf_response
 
 
@@ -44,9 +49,67 @@ class OfferAdmin(admin.ModelAdmin):
 	
 
 	def save_model(self, request, obj, form, change):
+		obj._status_before_save = (
+			Offer.objects.only('status').get(pk=obj.pk).status if change else None
+		)
 		if not change and obj.created_by is None:
 			obj.created_by = request.user
 		super().save_model(request, obj, form, change)
+
+	def save_related(self, request, form, formsets, change):
+		super().save_related(request, form, formsets, change)
+		if (
+			form.instance.status == Offer.Status.SENT
+			and form.instance._status_before_save != Offer.Status.SENT
+		):
+			try:
+				self._deduct_offer_stock(form.instance)
+			except ValidationError as error:
+				previous_status = (
+					form.instance._status_before_save or Offer.Status.DRAFT
+				)
+				Offer.objects.filter(pk=form.instance.pk).update(status=previous_status)
+				form.instance.status = previous_status
+				self.message_user(
+					request,
+					'İşlem tamamlanamadı: ' + ' '.join(error.messages),
+					level='error',
+				)
+
+	def _deduct_offer_stock(self, offer):
+		required_by_product = defaultdict(int)
+		product_names = {}
+		for item in offer.items.select_related('product'):
+			required_by_product[item.product_id] += item.quantity
+			product_names[item.product_id] = str(item.product)
+
+		with transaction.atomic():
+			stocks = {
+				stock.product_id: stock
+				for stock in Stock.objects.select_for_update().filter(
+					product_id__in=required_by_product,
+				)
+			}
+			shortages = []
+			for product_id, required_quantity in required_by_product.items():
+				stock = stocks.get(product_id)
+				available_quantity = stock.quantity if stock else 0
+				if available_quantity < required_quantity:
+					shortages.append(
+						f'{product_names[product_id]}: {required_quantity} adet gerekli, '
+						f'{available_quantity} adet stok var.'
+					)
+
+			if shortages:
+				raise ValidationError(
+					'Gönderildi durumuna alınamadı. Stok yetersiz: '
+					+ ' '.join(shortages)
+				)
+
+			for product_id, required_quantity in required_by_product.items():
+				stock = stocks[product_id]
+				stock.quantity -= required_quantity
+				stock.save()
 
 	@admin.display(description='Teklif numarası')
 	def offer_number_display(self, obj):
