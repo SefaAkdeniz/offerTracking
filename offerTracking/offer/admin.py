@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.contrib.admin import RelatedOnlyFieldListFilter
+from django.db.models import Prefetch
 from .models import Offer, OfferItem, PaymentMethod
 from .views import offer_pdf_response
 
@@ -19,7 +20,7 @@ class OfferItemInline(admin.TabularInline):
 
 @admin.register(Offer)
 class OfferAdmin(admin.ModelAdmin):
-	list_display = ('offer_number_display', 'customer', 'customer_contact', 'offer_date', 'status', 'payment_method', 'discount', 'total_display', 'created_by')
+	list_display = ('offer_number_display', 'customer', 'customer_contact', 'offer_date', 'status', 'stock_available', 'payment_method', 'discount', 'total_display', 'created_by')
 	list_filter = (
         ('customer', RelatedOnlyFieldListFilter),
         ('customer_contact', RelatedOnlyFieldListFilter),
@@ -34,6 +35,11 @@ class OfferAdmin(admin.ModelAdmin):
 	list_per_page = 15
 	inlines = (OfferItemInline,)
 	actions = ('download_pdf_with_photos', 'download_pdf_without_photos')
+
+	def get_queryset(self, request):
+		return super().get_queryset(request).prefetch_related(
+			Prefetch('items', queryset=OfferItem.objects.select_related('product__stock')),
+		)
 	
 
 	def save_model(self, request, obj, form, change):
@@ -48,6 +54,17 @@ class OfferAdmin(admin.ModelAdmin):
 	@admin.display(description="Toplam")
 	def total_display(self,obj):
 		return f"{obj.total:.2f}"
+
+	@admin.display(boolean=True, description='Stok yeterli')
+	def stock_available(self, obj):
+		if obj.status != Offer.Status.APPROVED:
+			return None
+
+		return all(
+			getattr(item.product, 'stock', None) is not None
+			and item.product.stock.quantity >= item.quantity
+			for item in obj.items.all()
+		)
 
 	def _download_pdf(self, request, queryset, include_photos):
 		if queryset.count() != 1:

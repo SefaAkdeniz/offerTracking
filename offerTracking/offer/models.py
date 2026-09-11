@@ -4,18 +4,15 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils import timezone
 
-
 class PaymentMethod(models.Model):
 	name = models.CharField('Ödeme yöntemi', max_length=100)
 	
-
 	class Meta:
 		verbose_name = 'Ödeme yöntemi'
 		verbose_name_plural = 'Ödeme yöntemleri'
 
 	def __str__(self):
 		return self.name
-
 
 class Offer(models.Model):
 	class Status(models.TextChoices):
@@ -29,6 +26,8 @@ class Offer(models.Model):
 		verbose_name='Müşteri',
 		on_delete=models.PROTECT,
 		related_name='offers',
+		blank=False,
+		null=False,
 	)
 	customer_contact = models.ForeignKey(
 		'customer.CustomerContact',
