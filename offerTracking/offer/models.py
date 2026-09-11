@@ -30,7 +30,7 @@ class Offer(models.Model):
 		related_name='created_offers',
 	)
 	discount = models.DecimalField(
-		'İskonto tutarı',
+		'Genel iskonto tutarı',
 		max_digits=12,
 		decimal_places=2,
 		default=0,
@@ -45,6 +45,9 @@ class Offer(models.Model):
 		return f'{self.customer} - Teklif {self.pk or "Yeni"}'
 
 	def clean(self):
+		if self.customer and self.customer.offer_temporarily_closed:
+			raise ValidationError({'customer': 'Bu müşteri için geçici olarak teklif oluşturulamaz.'})
+
 		if self.customer_contact and self.customer_id != self.customer_contact.customer_id:
 			raise ValidationError({'customer_contact': 'Müşteri kişisi seçilen müşteriye ait olmalıdır.'})
 
