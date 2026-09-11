@@ -1,7 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator
 
-
 class Brand(models.Model):
 	name = models.CharField('Marka adı', max_length=100, unique=True)
 
@@ -13,7 +12,6 @@ class Brand(models.Model):
 	def __str__(self):
 		return self.name
 
-
 class ProductGroup(models.Model):
 	name = models.CharField('Ürün grubu adı', max_length=150, unique=True)
 
@@ -23,7 +21,6 @@ class ProductGroup(models.Model):
 
 	def __str__(self):
 		return self.name
-
 
 class Product(models.Model):
 	photo = models.ImageField('Fotoğraf', upload_to='products/', blank=True)
@@ -53,7 +50,6 @@ class Product(models.Model):
 	def __str__(self):
 		return self.product_code
 
-
 class Stock(models.Model):
 	product = models.OneToOneField(
 		Product,
@@ -73,7 +69,7 @@ class Stock(models.Model):
 		#ordering = ('product__name',)
 
 	def __str__(self):
-		return f'{self.product} - {self.quantity}'
+		return f'{self.product}'
 
 	def save(self, *args, **kwargs):
 		if self.quantity == 0:

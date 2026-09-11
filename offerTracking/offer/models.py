@@ -4,7 +4,6 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils import timezone
 
-
 class Offer(models.Model):
 	customer = models.ForeignKey(
 		'customer.Customer',
@@ -41,10 +40,9 @@ class Offer(models.Model):
 	class Meta:
 		verbose_name = 'Teklif'
 		verbose_name_plural = 'Teklifler'
-		#ordering = ('-offer_date', '-id')
 
 	def __str__(self):
-		return f'{self.customer} - Teklif {self.pk or "yeni"} - Revizyon {self.revision_number}'
+		return f'{self.customer} - Teklif {self.pk or "Yeni"}'
 
 	def clean(self):
 		if self.customer_contact and self.customer_id != self.customer_contact.customer_id:
@@ -52,8 +50,11 @@ class Offer(models.Model):
 
 	@property
 	def offer_number(self):
-		creator = self.created_by.username if self.created_by else 'kullanici-yok'
-		return f'{self.offer_date:%Y}-{creator}-{self.pk}/{self.revision_number}'
+		creator = (self.created_by.username if self.created_by else 'kullanici-yok')[:3].upper()
+		offer_number = f'{self.offer_date:%y}{creator}{self.pk}'
+		if self.revision_number:
+			offer_number += f'/{self.revision_number}'
+		return offer_number
 
 	@property
 	def subtotal(self):
@@ -67,7 +68,6 @@ class Offer(models.Model):
 		if self.pk:
 			self.revision_number += 1
 		super().save(*args, **kwargs)
-
 
 class OfferItem(models.Model):
 	offer = models.ForeignKey(
@@ -114,4 +114,4 @@ class OfferItem(models.Model):
 		]
 
 	def __str__(self):
-		return f'{self.product} - {self.quantity}'
+		return f'{self.product} - {self.quantity} Adet'

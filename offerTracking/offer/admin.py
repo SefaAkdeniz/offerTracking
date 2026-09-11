@@ -11,7 +11,7 @@ class OfferItemInline(admin.TabularInline):
 
 @admin.register(Offer)
 class OfferAdmin(admin.ModelAdmin):
-	list_display = ('offer_number_display', 'customer', 'customer_contact', 'offer_date', 'discount', 'created_by')
+	list_display = ('offer_number_display', 'customer', 'customer_contact', 'offer_date', 'discount', 'total_display' , 'created_by')
 	list_filter = (
         ('customer', RelatedOnlyFieldListFilter),
         ('customer_contact', RelatedOnlyFieldListFilter),
@@ -35,6 +35,10 @@ class OfferAdmin(admin.ModelAdmin):
 	@admin.display(description='Teklif numarası')
 	def offer_number_display(self, obj):
 		return obj.offer_number
+	
+	@admin.display(description="Toplam")
+	def total_display(self,obj):
+		return f"{obj.total:.2f}"
 
 	def _download_pdf(self, request, queryset, include_photos):
 		if queryset.count() != 1:
